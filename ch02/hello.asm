@@ -2,7 +2,7 @@ global _start
 
 ; .data section is used for global variables.
 section .data
-message: db 'hello, world!', 10		;10 is new line ASCII code
+message: db 'hello, world!', 10		; 10 is new line ASCII code
 
 ; .text section is used for for program instructions.
 section .text

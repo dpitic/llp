@@ -2,12 +2,12 @@ ROOT = ..
 PLATFORM = $(shell $(ROOT)/systype.sh)
 include $(ROOT)/Make.defines.$(PLATFORM)
 
-PROGS = hello hello_proper_exit
+PROGS = hello hello_proper_exit print_rax
 
 all:	$(PROGS)
 
 %:	%.asm
-	$(NASM) $(ASM_FLAGS) $@.asm
+	$(ASM) $(ASM_FLAGS) $@.asm
 	$(LD) $@.o -o $@
 
 clean:
