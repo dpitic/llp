@@ -2,7 +2,7 @@ ROOT = ..
 PLATFORM = $(shell $(ROOT)/systype.sh)
 include $(ROOT)/Make.defines.$(PLATFORM)
 
-PROGS = hello hello_proper_exit print_rax
+PROGS = hello hello_proper_exit print_rax print_call
 
 all:	$(PROGS)
 
