@@ -3,8 +3,8 @@
 # Definitions required in all program directories to assemble and link
 # assembly programs using nasm.
 
-ASM = nasm
-ASM_FLAGS = -felf64 -Wall -g
+AS = nasm
+ASFLAGS = -felf64 -Wall -g
 
 # Common temp files to delete from each directory.
 TEMPFILES = core.* *.o temp.* *.out

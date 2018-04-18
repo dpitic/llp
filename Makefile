@@ -1,4 +1,4 @@
-DIRS = ch02
+DIRS = ch02 a_gdb
 
 all:
 	for i in $(DIRS); do \
