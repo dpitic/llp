@@ -2,7 +2,8 @@ ROOT = ..
 PLATFORM = $(shell $(ROOT)/systype.sh)
 include $(ROOT)/Make.defines.$(PLATFORM)
 
-PROGS = hello hello_proper_exit print_rax print_call endianness
+PROGS = hello hello_proper_exit print_rax print_call endianness strlen \
+				strlen_bug1
 
 all:	$(PROGS)
 

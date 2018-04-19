@@ -23,7 +23,7 @@ mov	rsi, [codes]
 ; in general the address can contain several components
 lea	rsi, [codes]
 
-; rsi <- memory contents starting at (codes + rax)
+; rsi <- memory contents starting at address (codes + rax)
 mov	rsi, [codes + rax]
 
 ; rsi <- address of (codes + rax)
