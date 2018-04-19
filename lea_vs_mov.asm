@@ -6,16 +6,20 @@
 mov	rsi, rax
 
 ; Square brackets denotes indirect addressing; the address is written inside
-; the brackets.
+; the brackets. NASM uses square brackets [address] to access the contents of a
+; memory location address (dereferences the pointer).
 ; rsi <- memory contents starting at address stored in rax
 mov	rsi, [rax]
 
 ; rsi <- address of label 'codes', a number
+; NASM uses the variable name as the address to provide access to the address
+; of a variable.
 mov	rsi, codes
 
 ; rsi <- memory contents starting at 'codes' address
 ; 8 consecutive bytes are taken because rsi is 8 bytes long
-; [identifier] dereferences the pointer identifier
+; NASM uses square brackets [address] to access the contents of a memory 
+; location address (dereferences the pointer).
 mov	rsi, [codes]
 
 ; rsi <- address of 'codes'
