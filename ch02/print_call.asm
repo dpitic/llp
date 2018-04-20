@@ -3,7 +3,8 @@
 
 section .data
 
-newline_char: db 10             ; ASCII 10 is LF character '\n'
+; newline_char: db 10             ; ASCII 10 is LF character '\n'
+newline_char: db `\n`             ; alternative LF character
 codes: db '0123456789abcdef'
 
 section .text
