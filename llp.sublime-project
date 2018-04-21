@@ -1,4 +1,13 @@
 {
+	"build_systems":
+	[
+		{
+			"file_regex": "^[ ]*File \"(...*?)\", line ([0-9]*)",
+			"name": "Anaconda Python Builder",
+			"selector": "source.python",
+			"shell_cmd": "\"python\" -u \"$file\""
+		}
+	],
 	"folders":
 	[
 		{
@@ -7,15 +16,8 @@
 	],
 	"settings":
 	{
-		// ---------------------------------------------------------------------
-		// SublimeGDB settings for project; prepend with sublimegdb_
-		// Generalised pattern for always using the current open file with an
-		// executable name as the current file.
-		"sublimegdb_workingdir": "${folder:${file}}",
-		// Arguments for the program
 		"sublimegdb_arguments": "",
-		// NOTE: You MUST provide --interpreter=mi for the plugin to work
-		"sublimegdb_commandline": "gdb --interpreter=mi --args ./${file_base_name}"
-		// ---------------------------------------------------------------------
+		"sublimegdb_commandline": "gdb --interpreter=mi --args ./${file_base_name}",
+		"sublimegdb_workingdir": "${folder:${file}}"
 	}
 }
