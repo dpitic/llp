@@ -9,7 +9,13 @@ codes: db '0123456789abcdef'
 section .text
 global _start
 
-; Function used to print a new line character.
+;;
+;; @brief      Write a new line character to stdout.
+;;
+;; @details    This function is used to display a new line character by writing
+;;             ASCII code 10 (LF character '\n') to stdout using the write()
+;;             syscall.
+;;
 print_newline:
   mov	rax, 1                    ; write() syscall identifier
   mov	rdi, 1                    ; stdout file descriptor
@@ -20,7 +26,14 @@ print_newline:
   pop r10
   ret                           ; print_newline
 
-; Function used to print the hexadecimal value passed in through rdi
+;;
+;; @brief      Write the hexadecimal value of the argument to stdout.
+;;
+;; @details    This function writes the hexadecimal value passed in through rdi
+;;             to stdout.
+;;
+;; @param      rdi   Contains the hexadecimal value to be printed.
+;;
 print_hex:
   mov rax, rdi                  ; rdi contains argument, save in rax
 
