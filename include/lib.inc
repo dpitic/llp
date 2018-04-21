@@ -44,7 +44,7 @@ print_string:
 ;;
 print_char:
   push rdi                      ; save address of character
-;  mov rdi, rsp
+  mov rdi, rsp
   call print_string             ; rax = length of string printed
   pop rdi
   ret
