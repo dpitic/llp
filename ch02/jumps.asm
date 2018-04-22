@@ -4,8 +4,8 @@
   mov		rdx, 2
 
   cmp		rax, rdx
-  jg		location
-  ja		location                ; different logic!
+  jg		location                ; comparison for signed numbers
+  ja		location                ; different logic: comparison for unsigned
 
   cmp		rax, rdx
   je		location                ; if rax equals rdx
