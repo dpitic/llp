@@ -1,4 +1,4 @@
-; Alternative version of program to strlen
+; Alternative version of program to strlen with some bugs.
 global _start
 
 section .data
@@ -10,6 +10,7 @@ strlen:
 .loop:
   ; By convention, the first and the only argument is taken from rdi
   ; String length counter in r13
+  ; r13 is a callee-saved register, so should be saved on stack before use.
   cmp byte [rdi+r13], 0         ; BUG: r13 not initialised
   je .end
   inc r13

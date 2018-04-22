@@ -4,13 +4,15 @@
 section .data
 
 ; newline_char: db 10             ; ASCII 10 is LF character '\n'
-newline_char: db `\n`             ; alternative LF character
-codes: db '0123456789abcdef'
+newline_char: db `\n`           ; alternative LF character
+codes: db '0123456789abcdef'    ; hex characters array
 
 section .text
 global _start
 
-; Function used to print a new line character.
+;;
+;; @brief      Print a new line character.
+;;
 print_newline:
   mov	rax, 1                    ; write() syscall identifier
   mov	rdi, 1                    ; stdout file descriptor
@@ -19,7 +21,11 @@ print_newline:
   syscall
   ret                           ; print_newline
 
-; Function used to print the hexadecimal value passed in through rdi
+;;
+;; @brief      Print the hexadecimal value passed in through rdi.
+;;
+;; @param      rdi   Contains the hexadecimal value to be printed.
+;;
 print_hex:
   mov rax, rdi                  ; rdi contains argument, save in rax
 
@@ -28,9 +34,11 @@ print_hex:
   mov rcx, 64                   ; amount used in shifting rax
 iterate:
   push rax                      ; save initial state of rax
-  sub rcx, 4
+  sub rcx, 4                    ; decrement index counter by 4
+  ; Transform whole number in rax into one of its hexadecimal digits 0..15,
+  ; use this as an index to look up the hex character in 'codes'.
   sar rax, cl                   ; shift to 60, 56, 52, ... 4, 0
-  and rax, 0xf                  ; clear all bits but the lowest four
+  and rax, 0xf                  ; clear all bits but the lowest four: rax=0..15
   lea rsi, [codes + rax]        ; take a hexadecimal digit character code
 
   mov rax, 1                    ; write() syscall identifier
@@ -39,7 +47,7 @@ iterate:
   syscall                       ; rax = 1: the write() identifier
                                 ; rdi = 1: stdout file descriptor
                                 ; rdx = 1: number of bytes to write()
-                                ; rsi = address of a character
+                                ; rsi = address of a character in 'codes'
   pop rcx
   pop rax
   test rcx, rcx                 ; rcx == 0 when all digits are shown

@@ -1,5 +1,5 @@
 ; This program implements the hexadecimal print program using function calls.
-; It is used to demonstrate function call convention.
+; It is used to demonstrate function call convention and endian effects.
 
 section .data
 
@@ -49,7 +49,7 @@ iterate:
   push rcx                      ; syscall will modify rcx
   mov rdi, 1                    ; stdout file descriptor
   mov rdx, 1                    ; number of bytes to write()
-                                ; rsi = address of a character
+                                ; rsi = address of a character in 'codes'
   syscall
     
   pop rcx

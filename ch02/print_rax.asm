@@ -19,7 +19,7 @@ _start:
 	; the result is the offset in 'codes' array
 .loop:
 	push	rax                     ; preserve value of rax
-	sub		rcx, 4                  ; decrement index counter by 4 bytes
+	sub		rcx, 4                  ; decrement index counter by 4
 	; cl is a register, smallest part of rcx
 	; rax -- eax -- ax -- ah + al
 	; rcx -- ecx -- cx -- ch + cl
