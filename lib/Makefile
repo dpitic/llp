@@ -6,16 +6,17 @@ PLATFORM = $(shell $(ROOT)/systype.sh)
 include $(ROOT)/Make.defines.$(PLATFORM)
 
 LIBLLP = libllp.a
-PROGS = lib.inc
+PROGS = libllp
+OBJS = ${PROGS:=.o}
 
 all:	$(LIBLLP)
 
-$(LIBLLP):	libllp.o
-	$(AR) rv $(LIBLLP) libllp.o
+$(LIBLLP):	$(OBJS)
+	$(AR) rv $(LIBLLP) $?
 	$(RANLIB) $(LIBLLP)
 
-libllp.o:	lib.inc
-	$(AS) $(ASFLAGS) -o libllp.o lib.inc
+%.o:	%.asm
+	$(AS) $(ASFLAGS) -o $@ $<
 
 clean:
 	rm -f *.o a.out core temp.* $(LIBLLP)
