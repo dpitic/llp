@@ -4,7 +4,13 @@
 # assembly programs using nasm.
 
 AS = nasm
-ASFLAGS = -felf64 -Wall -g
+ASFLAGS = -i$(ROOT)/include/ -felf64 -Wall -g
+
+LDDIR = -L$(ROOT)/lib/
+LDLIBS = $(LDDIR) -lllp
+RANLIB = ranlib
+AR = ar
+LIBLLP = $(ROOT)/lib/libllp.a
 
 # Common temp files to delete from each directory.
 TEMPFILES = core.* *.o temp.* *.out

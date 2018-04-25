@@ -1,4 +1,4 @@
-DIRS = ch02 a_gdb ch04
+DIRS = lib ch02 a_gdb ch04
 
 all:
 	for i in $(DIRS); do \

@@ -1,5 +1,8 @@
 ; Basic I/O library.
 
+%ifndef LIB_INC
+%define LIB_INC
+
 section .text
 
 ;;
@@ -10,6 +13,7 @@ section .text
 ;;
 ;; @return     rax   Length of the string.
 ;;
+global string_length:function
 string_length:
   xor rax, rax                  ; initialise string length counter
 .loop:
@@ -26,6 +30,7 @@ string_length:
 ;;
 ;; @param      rdi   Pointer to a null-terminated string.
 ;;
+global print_string:function
 print_string:
   push rdi                      ; save address of string
   call string_length            ; rax = length of string
@@ -42,6 +47,7 @@ print_string:
 ;;
 ;; @param      rdi   Character code to print.
 ;;
+global print_char:function
 print_char:
   push rdi                      ; save address of character
   mov rdi, rsp
@@ -52,6 +58,7 @@ print_char:
 ;;
 ;; @brief      Print a newline character (ASCII code 0xA).
 ;;
+global print_newline:function
 print_newline:
   mov rdi, `\n`
   jmp print_char
@@ -61,6 +68,7 @@ print_newline:
 ;;
 ;; @param      rdi   Unsigned 8 byte integer to print.
 ;;
+global print_uint:function
 print_uint:
   mov rax, rdi
   mov rdi, rsp
@@ -89,6 +97,7 @@ print_uint:
 ;;
 ;; @param      rdi   Signed 8 byte integer to output.
 ;;
+global print_int:function
 print_int:
   test rdi, rdi
   jns print_uint
@@ -110,6 +119,7 @@ print_int:
 ;;
 ;; @return     rax   1 if the strings are equal; otherwise 0.
 ;;
+global string_equals:function
 string_equals:
   mov al, byte [rdi]
   cmp al, byte [rsi]
@@ -133,6 +143,7 @@ string_equals:
 ;;
 ;; @return     rax   Character read from stdin; 0 on EOF.
 ;;
+global read_char:function
 read_char:
   push 0                        ; read buffer on stack
   xor rax, rax                  ; read() syscall identifier = 0
@@ -154,6 +165,7 @@ read_char:
 ;; @return     0 if word is too big for buffer specified; otherwise returns a
 ;;             buffer address.
 ;;
+global read_word:function
 read_word:
   push r14
   push r15
@@ -221,6 +233,7 @@ read_word:
 ;;
 ;; @return     rax   Parsed number. Length in rdx.
 ;;
+global parse_uint:function
 parse_uint:
   mov r8, 10
   xor rax, rax                  ; initialise return number = 0
@@ -251,6 +264,7 @@ parse_uint:
 ;; @return     rax   Number parsed. Length of string in rdx, including sign. 0
 ;;             otherwise in rax.
 ;;
+global parse_int:function
 parse_int:
   mov al, byte [rdi]
   cmp al, '-'
@@ -285,6 +299,7 @@ parse_int:
 ;; @return     Destination address is returned in rax if the string fits the
 ;;             buffer; orthewise return 0 in rax.
 ;;
+global string_copy:function
 string_copy:
   push rdi                      ; pointer to source string
   push rsi                      ; pointer to destination buffer
@@ -313,3 +328,5 @@ string_copy:
   .too_long:
   xor rax, rax                  ; string too big for buffer, rax = 0
   ret
+
+%endif                          ; LIB_INC
