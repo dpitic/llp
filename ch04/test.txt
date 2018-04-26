@@ -7,8 +7,8 @@ PROGS = mappings_loop segfault_badaddr mmap
 all:	$(PROGS)
 
 %:	%.asm $(LIBLLP)
-	$(AS) $(ASFLAGS) $@.asm
-	$(LD) $@.o -o $@ $(LDLIBS)
+	$(AS) $(ASFLAGS) $<
+	$(LD) $@.o -o $@ $(LDLIBS)	
 
 clean:
 	rm -f $(PROGS) $(TEMPFILES) *.o
