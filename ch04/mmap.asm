@@ -1,4 +1,7 @@
 ; This program displays the contents of the file 'test.txt' on the terminal.
+; The implementation uses the mmap() system call to map the file into memory
+; and then calls the print_string I/O library function to display the contents
+; of that memory region on the terminal.
 
 ; From /usr/include/asm-generic/fcntl.h
 %define O_RDONLY 0
@@ -11,7 +14,7 @@ section .data
 fname: db 'test.txt', 0         ; File name of file to display
 
 section .text
-extern print_string             ; defined in external library
+extern print_string             ; defined in external I/O library
 ;%include "lib.inc"              ; alternative using include file
 global _start
 

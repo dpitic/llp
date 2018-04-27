@@ -2,15 +2,19 @@ ROOT = ..
 PLATFORM = $(shell $(ROOT)/systype.sh)
 include $(ROOT)/Make.defines.$(PLATFORM)
 
-PROGS = mappings_loop segfault_badaddr mmap
+PROGS = mappings_loop segfault_badaddr
+MMAP = mmap
 
-all:	$(PROGS)
+all:	$(PROGS) $(MMAP)
 
-%:	%.asm $(LIBLLP)
+%:	%.asm
 	$(AS) $(ASFLAGS) $<
-	$(LD) $@.o -o $@ $(LDLIBS)	
+	$(LD) $@.o -o $@
 
-clean:
-	rm -f $(PROGS) $(TEMPFILES) *.o
+mmap:	mmap.asm $(LIBLLP)
+	$(AS) $(ASFLAGS) $<
+	$(LD) $@.o -o $@ $(LDLIBS)
 
 .PHONY:	clean
+clean:
+	rm -f $(PROGS) $(MMAP) $(TEMPFILES) *.o
