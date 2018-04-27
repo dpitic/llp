@@ -16,7 +16,7 @@ $(LIBLLP):	$(OBJS)
 	$(RANLIB) $(LIBLLP)
 
 %.o:	%.asm
-	$(AS) $(ASFLAGS) -o $@ $<
+	$(AS) $(ASFLAGS) -o $@ $?
 
 clean:
 	rm -f *.o a.out core temp.* $(LIBLLP)

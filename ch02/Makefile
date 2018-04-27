@@ -8,7 +8,7 @@ PROGS = hello hello_proper_exit print_rax print_call endianness strlen \
 all:	$(PROGS)
 
 %:	%.asm
-	$(AS) $(ASFLAGS) $@.asm
+	$(AS) $(ASFLAGS) $<
 	$(LD) $@.o -o $@
 
 clean:

@@ -9,11 +9,11 @@ CFLAGS = -std=c11 -ggdb -Wall
 all:	$(PROGS)
 
 %:	%.asm
-	$(AS) $(ASFLAGS) $@.asm
+	$(AS) $(ASFLAGS) $<
 	$(LD) $@.o -o $@
 
 %: %.c
-	$(CC) $(CFLAGS) $@.c -o $@
+	$(CC) $(CFLAGS) -o $@ $<
 
 clean:
 	rm -f $(PROGS) $(TEMPFILES) *.o
