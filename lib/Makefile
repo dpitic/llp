@@ -12,8 +12,7 @@ OBJS = ${PROGS:=.o}
 all:	$(LIBLLP)
 
 $(LIBLLP):	$(OBJS)
-	$(AR) rv $(LIBLLP) $?
-	$(RANLIB) $(LIBLLP)
+	$(AR) rsv $(LIBLLP) $?
 
 %.o:	%.asm
 	$(AS) $(ASFLAGS) -o $@ $?

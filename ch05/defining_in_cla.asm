@@ -1,6 +1,6 @@
 ; This code snippet demonstrates conditional assembly based on definition of a
 ; macro identifier, which can be passed to nasm through the -d command line
-; flag. Assemble the file using:
+; flag (-D is a synonym for -d). Assemble the file using:
 ;
 ;  $ nasm -E -dFLAG defining_in_cla.asm
 ;
