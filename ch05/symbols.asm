@@ -1,16 +1,20 @@
 ; This code snippet is used to investigate an object file.
+;   $ objdump -tf -m intel symbols.o
+;   $ objdump -D -M intel-mnemonic symbols.o
+;   $ readelf --relocs symbols.o
+;   $ nm -als symbols.o
 
-section .data
+section .data                   ; initialised global variables
 datavar1: dq 1488
 datavar2: dq 42
 
-section .bss
+section .bss                    ; r/w global variables
 bssvar1: resq 4*1024*1024
 bssvar2: resq 1
 
 section .text
 
-extern somewhere
+extern somewhere                ; defined in another (external) module
 global _start
   mov rax, datavar1
   mov rax, bssvar1

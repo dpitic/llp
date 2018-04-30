@@ -2,7 +2,7 @@ ROOT = ..
 PLATFORM = $(shell $(ROOT)/systype.sh)
 include $(ROOT)/Make.defines.$(PLATFORM)
 
-PROGS = executable_object main
+PROGS = executable_object libso_main
 MACRO_ARG = macro_arg_types
 OBJS = symbols.o
 OBJ_SRC = ${OBJS:.o=.asm}
@@ -24,7 +24,7 @@ executable_object:	executable_object.asm $(OBJS)
 	$(AS) $(ASFLAGS) $<
 	$(LD) symbols.o $@.o -o $@
 
-main:	libso_main.asm libso.so
+libso_main:	libso_main.asm libso.so
 	$(AS) $(ASFLAGS) -o $@.o $<
 	$(LD) $@.o -o $@ -d libso.so -rpath=. -I/lib64/ld-linux-x86-64.so.2
 
