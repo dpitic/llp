@@ -42,6 +42,25 @@ print_string:
   ret
 
 ;;
+;; @brief      Write string to stderr.
+;;
+;; @details    Accepts a pointer in rdi to a null-terminated error string and
+;;             writes it to stderr.
+;;
+;; @param      rdi is pointer to null-terminated error string.
+;;
+global print_error:function
+print_error:
+  push rdi                      ; save address of string
+  call string_length            ; rax = length of string
+  pop rsi                       ; address of string to print
+  mov rdx, rax                  ; string length
+  mov rax, 1                    ; write() syscall identifier
+  mov rdi, 2                    ; stderr file descriptor
+  syscall
+  ret
+
+;;
 ;; @brief      Accepts a character code directly as the first argument in rdi
 ;;             and prints it to stdout.
 ;;
@@ -160,7 +179,7 @@ read_char:
 ;; @details    Accepts a buffer address and size as arguments, and reads the
 ;;             next word from stdin (skipping whitespaces) into buffer.
 ;;
-;; @param      rsi   Address of buffer used to store word read from stdin.
+;; @param      rdi   Address of buffer used to store word read from stdin.
 ;;
 ;; @return     0 if word is too big for buffer specified; otherwise returns a
 ;;             buffer address.
@@ -328,5 +347,20 @@ string_copy:
   .too_long:
   xor rax, rax                  ; string too big for buffer, rax = 0
   ret
+
+;;
+;; @brief      Exit process.
+;;
+;; @details    Accept exit status in rdi and calls exit() system call to
+;;             terminate the process.
+;;
+;; @param      rdi contains the exit status passed to exit() system call.
+;;
+;; @return     rdi contains the exit status returned to the calling process.
+;;
+global exit:function
+exit:
+  mov rax, 60                   ; exit() syscall identifier
+  syscall
 
 %endif                          ; LIB_INC

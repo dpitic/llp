@@ -1,7 +1,7 @@
 ; This code snippet is used to investigate an object file.
 ;   $ objdump -tf -m intel symbols.o
 ;   $ objdump -D -M intel-mnemonic symbols.o
-;   $ readelf --relocs symbols.o
+;   $ readelf -r symbols.o
 ;   $ nm -als symbols.o
 
 section .data                   ; initialised global variables

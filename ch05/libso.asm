@@ -1,14 +1,16 @@
 ; This file contains the code for a shared library function.
+; Examine the shared object using:
+;   $ readelf -S libso.so
 
 extern _GLOBAL_OFFSET_TABLE_
 
-global func:function
+global func:function            ; exported function
 
 section .rodata                 ; read only data
 message: db "Shared object wrote this", 10, 0
 .len: equ $ - message
 
-section .text
+section .text                   ; machine instructions
 
 ;;
 ;; @brief      Write a null-terminated string to stdout.
