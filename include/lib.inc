@@ -79,7 +79,7 @@ print_char:
 ;;
 global print_newline:function
 print_newline:
-  mov rdi, `\n`
+  mov rdi, `\n`                 ; ASCII 10
   jmp print_char
 
 ;;
@@ -92,7 +92,7 @@ print_uint:
   mov rax, rdi
   mov rdi, rsp
   push 0
-  sub rsp, 16
+  sub rsp, 16                   ; allocate 16 bytes on the stack
 
   dec rdi
   mov r8, 10
@@ -160,7 +160,7 @@ string_equals:
 ;; @details    This function uses the stack to allocate memory for the read
 ;;             buffer.
 ;;
-;; @return     rax   Character read from stdin; 0 on EOF.
+;; @return     rax   Character read; 0 on EOF.
 ;;
 global read_char:function
 read_char:
@@ -170,8 +170,8 @@ read_char:
   mov rsi, rsp                  ; address of read buffer on stack
   mov rdx, 1                    ; size of read buffer = 1 byte
   syscall
-  pop rax                       ; read buffer
-  ret                           ; rax = character read 
+  pop rax                       ; 0 for EOF or character read
+  ret                           ; rax = character read or 0 for EOF
 
 ;;
 ;; @brief      Read next word from stdin.
@@ -180,21 +180,23 @@ read_char:
 ;;             next word from stdin (skipping whitespaces) into buffer.
 ;;
 ;; @param      rdi   Address of buffer used to store word read from stdin.
+;;             rsi   Size of read buffer.
 ;;
-;; @return     0 if word is too big for buffer specified; otherwise returns a
-;;             buffer address.
+;; @return     rax   0 if word is too big for buffer specified; otherwise
+;;                   pointer to buffer address.
+;;             rdx   Length of word (bytes).
 ;;
 global read_word:function
 read_word:
-  push r14
-  push r15
-  xor r14, r14
-  mov r15, rsi
-  dec r15
+  push r14                      ; buffer index (offset)
+  push r15                      ; max. string length
+  xor r14, r14                  ; initialise index in buffer
+  mov r15, rsi                  ; r15 = size of read buffer
+  dec r15                       ; allow for null terminator
 
-  .A:
+.A:                             ; read first character, skipping white spaces
   push rdi
-  call read_char
+  call read_char                ; rax = character read from stdin
   pop rdi
   cmp al, ' '
   je .A                         ; skip space
@@ -207,42 +209,42 @@ read_word:
   test al, al
   jz .C                         ; null terminator found
 
-  .B:
+.B:                             ; read subsequent characters, not white space
   mov byte [rdi + r14], al
-  inc r14
+  inc r14                       ; increment index in buffer
 
   push rdi
-  call read_char
+  call read_char                ; rax = character read from stdin
   pop rdi
-  cmp al, ' '
-  je .C                         ; skip space
+  cmp al, ' '                   ; any white space character == end of word
+  je .C                         ; found space at end of word
   cmp al, 10
-  je .C                         ; skip LF ('\n')
+  je .C                         ; found LF ('\n') at end of word
   cmp al, 13
-  je .C                         ; skip CR ('\n')
+  je .C                         ; found CR ('\r') at end of word
   cmp al, 9
-  je .C                         ; skip TAB ('\t')
+  je .C                         ; found TAB ('\t') at end of word
   test al, al
   jz .C                         ; null terminator found
-  cmp r14, r15
+  cmp r14, r15                  ; check if buffer is full
   je .D
 
-  jmp .B
+  jmp .B                        ; read next character
 
-  .C:
-  mov byte [rdi + r14], 0
-  mov rax, rdi
+.C:                             ; end of word string, null or white space found
+  mov byte [rdi + r14], 0       ; null terminate buffer
+  mov rax, rdi                  ; pointer to buffer
 
-  mov rdx, r14
+  mov rdx, r14                  ; rdx = length of word (bytes)
   pop r15
   pop r14
-  ret
+  ret                           ; rax = pointer to buffer read
 
-  .D:
-  xor rax, rax
+.D:                             ; buffer is full
+  xor rax, rax                  ; string is too long for buffer, rax == 0
   pop r15
   pop r14
-  ret
+  ret                           ; rax == 0, string too long for buffer
 
 ;;
 ;; @brief      Accepts a null-terminated string and tries to parse an unsigned
@@ -280,8 +282,8 @@ parse_uint:
 ;;
 ;; @param      rdi   Pointer to string.
 ;;
-;; @return     rax   Number parsed. Length of string in rdx, including sign. 0
-;;             otherwise in rax.
+;; @return     rax   Number parsed on success, otherwise 0.
+;;             rdx   Length of string, including sign.
 ;;
 global parse_int:function
 parse_int:
