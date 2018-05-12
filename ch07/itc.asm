@@ -7,6 +7,8 @@ extern print_string
 
 global _start
 
+; Forth registers are implemented in callee-saved registers so they are
+; guaranteed to survive function calls unchanged.
 %define pc r15                  ; pointer to memory cell that stores execution
                                 ; token of a word.
 %define w r14                   ; pointer to first word when word starts its
