@@ -4,7 +4,7 @@
 %ifndef _MACRO_INC_
 %define _MACRO_INC_
 
-%define _lw 0
+%define _lw 0                   ; pointer to previous word
 
 ;;
 ;; @brief      Define a native word.
@@ -20,16 +20,20 @@
 ;;
 %macro native 3
   section .data
-  wh_ %+ %2 : dq _lw
-  %define _lw wh_ %+ %2         ; Forth native word name
+  wh_ %+ %2:                    ; Forth word definition label (native word)
+  dq _lw                        ; pointer to previous word
+  %define _lw wh_ %+ %2         ; update previous word pointer to this word label
+                                ; for .data section
   db 0                          ; mark the name start
   db %1, 0                      ; word name
   db %3                         ; flags
 
-  xt_ %+ %2 : dq i_ %+ %2       ; execution token
+  xt_ %+ %2:                    ; execution token for word, equal to address of
+  dq i_ %+ %2                   ; its implementation
   section .text
-  i_ %+ %2:                     ; word implementation
-  %define _lw wh_%+ %2
+  i_ %+ %2:                     ; word implementation label
+  %define _lw wh_ %+ %2         ; previous word pointer in .text section set to
+                                ; this word
 %endmacro
 
 ;;
@@ -57,13 +61,15 @@
 ;;
 %macro colon 3
   section .data
-  wh_ %+ %2 : dq _lw
-  %define _lw wh_ %+ %2         ; Forth colon word name
+  wh_ %+ %2:                    ; Forth colon word definition label
+  dq _lw                        ; pointer to previous word
+  %define _lw wh_ %+ %2         ; update previous word pointer to this word label
   db 0                          ; make the name start
   db %1, 0                      ; word name
   db %3                         ; flags
 
-  xt_ %+ %2 : dq i_docol        ; execution token
+  xt_ %+ %2:                    ; execution token for colon word, equal to
+  dq i_docol                    ; address of docol implementation
 %endmacro
 
 ;;
