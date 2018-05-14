@@ -140,7 +140,7 @@ native "-", minus
 ;;             a' = 0 if a != 0
 ;;             a' = 1 if a == 0
 ;;
-natiave "not", not
+native "not", not
   pop rax
   test rax, rax
   setz al
@@ -391,3 +391,316 @@ native "number", number
   push rax
   push rdx
   jmp next
+
+;;
+;; @brief      Print a null-terminated string on stdout.
+;;
+;; @details    Pop the null-terminated string from the top of the stack and
+;;             write it to stdout.
+;;             ( addr -- )
+;;
+;; @param      Null-terminated string at the top of the stack.
+;;
+native "prints", prints
+  pop rdi
+  call print_string
+  jmp next
+
+;;
+;; @brief      Exit Forthress.
+;;
+native "bye", bye
+  mov rax, 60                   ; exit() syscall identifier
+  xor rdi, rdi                  ; 0 exit status
+  syscall
+
+;;
+;; @brief      Execute system call.
+;;
+;; @details    The following registers store arguments according to ABI:
+;;             rdi, rsi, rdx, r10, r8, r9. The syscall return code is pushed
+;;             onto the stack.
+;;
+;; @param      ( num a1 a2 a3 a4 a5 a6 -- rax )
+;;
+;; @return     Syscall return code.
+;;
+native "syscall", syscall
+  pop r9
+  pop r8
+  pop r10
+  pop rdx
+  pop rsi
+  pop rdi
+  pop rax                       ; syscall identifier
+  syscall
+  push rax                      ; syscall return value
+  jmp next
+
+;;
+;; @brief      Jump to a location, defined as an offset relative to the
+;;             argument end.
+;;
+;; @details    branch is a compile only word. It works as shown below:
+;;             |xt_branch|     24 | <next command>
+;;                                 ^ adds 24 to this address and stores it in pc
+;;
+;; @param      Offset
+;;
+native "branch", branch
+  add pc, [pc]
+  add pc, 8
+  jmp next
+
+;;
+;; @brief      Jump to a location if TOS = 0.
+;;
+;; @details    0branch is a compile only word. It works as shown below:
+;;             |xt_branch|     24 | <next command>
+;;                                 ^ adds 24 to this address and stores it in pc
+;;
+;; @param      Offset
+;;
+native "0branch", branch0
+  pop rax
+  test rax, rax
+  jnz .skip
+  add pc, [pc]
+.skip:
+  add pc, 8
+  jmp next
+
+;;
+;; @brief      Push a value immediately following this execution token.
+;;
+;; @details    lit <value>
+;;
+;; @param      Value to push.
+;;
+native "lit", lit
+  push qword [pc]
+  add pc, 8
+  jmp next
+
+; Address of the input buffer (used by interpreter/compiler)
+const inbuf, input_buf
+
+; Address of user memory.
+const mem, user_mem
+
+; Last word address
+const last_word, last_word
+
+; State call address
+; The state cell stores either 1 (compilation mode) or 0 (interpreter mode)
+const state, state
+
+; here points to the last cell of the word currently being defined.
+const here, [here]
+
+;;
+;; @brief      Execute word with this execution token on TOS.
+;;
+;; @details    ( xt -- )
+;;
+;; @param      Execution token.
+;;
+native "execute", execute
+  pop rax
+  mov w, rax
+  jmp [rax]
+
+;;
+;; @brief      Fetch value from memory.
+;;
+;; @details    ( addr -- value )
+;;
+;; @param      Address
+;;
+;; @return     Value at address.
+;;
+native "@", fetch
+  pop rax
+  push qword [rax]
+  jmp next
+
+;;
+;; @brief      Store value by address.
+;;
+;; @details    ( addr val -- )
+;;
+;; @param      Value and address where to store value.
+;;
+native "!", write
+  pop rax                       ; value
+  pop rdx                       ; address
+  mov [rdx], rax
+  jmp next
+
+;;
+;; @brief      Read one byte starting at given address.
+;;
+;; @details    ( addr -- char )
+;;
+;; @param      Address from where to read the byte from.
+;;
+;; @return     Character read from the address.
+;;
+native "@c", fetch_char
+  pop rax
+  movzx rax, byte [rax]
+  push rax
+  jmp next
+
+;;
+;; @brief      Add operand to the word being defined.
+;;
+;; @details    ( x -- )
+;;
+;; @param      param
+;;
+native ",", comma
+  mov rax, [here]
+  pop qword [rax]
+  add qword [here], 8
+  jmp next
+
+;;
+;; @brief      Add a single byte to the word being defined.
+;;
+;; @details    ( c -- )
+;;
+;; @param      Byte to be added to the word being defined.
+;;
+native "c,", char_comma
+  mov rax, [here]
+  pop rdx
+  mov [rax], dl
+  add qword [here], 1
+  jmp next
+
+;;
+;; @brief      Create an entry in the dictionary whose name is the new name.
+;;
+;; @details    Take flag and name and create an entry in the dictionary. Only
+;;             immediate flag is implemented currently.
+;;
+;; @param      ( flags name -- )
+;;
+native "create", create
+  ; link
+  mov rcx, [last_word]
+  mov rsi, [here]
+  mov [rsi], rcx
+  mov [last_word], rsi
+  add rsi, 8
+  mov byte [rsi], 0
+  inc rsi
+
+  ; name
+  pop rdi
+  push rsi
+  call string_copy
+  pop rsi
+  push rsi
+  mov rdi, rsi
+  call string_length
+  pop rsi
+  add rsi, rax
+
+  ; flags
+  inc rsi
+  pop rax
+  mov [rsi], al
+  inc rsi
+
+  mov [here], rsi
+  jmp next
+
+;;
+;; @brief      Read word from stdin and start defining it.
+;;
+colon ":", colon
+.restart:
+  dq xt_inbuf, xt_word
+  branch0 .restart
+  dq xt_lit, 0, xt_inbuf, xt_create
+  dq xt_state, xt_lit, 1, xt_write
+  dq xt_lit, i_docol, xt_comma
+  dq xt_exit
+
+;;
+;; @brief      End the current word definition.
+;;
+colon ";", semicolon, 1
+  dq xt_state, xt_lit, 0, xt_write
+  dq xt_lit, xt_exit, xt_comma
+  dq xt_exit
+
+;;
+;; @brief      Forthress interpreter/compiler.
+;;
+colon "interpreter", interpreter
+.start:
+  dq xt_inbuf, xt_word
+  branch0 .end_of_input
+
+  dq xt_inbuf, xt_find          ; find in dictionary
+
+  dq xt_dup
+  branch0 .number               ; if not found, try to parse as a number
+  dq xt_cfa
+
+  ; if compile
+  dq xt_state, xt_fetch
+  branch0 .interpreting
+
+  ; if is immediate
+  dq xt_dup
+  dq  xt_lit, 1, xt_minus, xt_fetch_char, xt_not
+  branch0 .interpreting
+
+  ; compile
+  dq xt_comma
+  branch .start
+
+.interpreting:
+  dq xt_execute
+  branch .start
+
+.number:
+  dq xt_drop
+  dq xt_drop
+  dq xt_inbuf
+  dq xt_number
+  branch0 .no_word
+
+  dq xt_state, xt_fetch         ; if interpreting, that's it
+  branch0 .start
+
+  ; When compiling, check it was after a branch
+  dq xt_here, xt_lit, 8, xt_minus
+  dq xt_lit, xt_branch0
+  dq xt_equals, xt_not
+  branch0 .is_branch
+
+  dq xt_here, xt_lit, 8, xt_minus
+  dq xt_lit, xt_branch
+  dq xt_equals, xt_not
+  branch0 .is_branch
+
+  dq xt_lit, xt_lit, xt_comma
+
+.is_branch:
+  dq xt_comma
+
+  branch .start
+
+.no_word:
+  dq xt_drop, xt_inbuf, xt_prints
+  dq xt_lit, msg_no_such_word, xt_prints
+  branch .start
+
+.end_of_input:
+  dq xt_bye
+  dq xt_exit
