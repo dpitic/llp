@@ -20,7 +20,7 @@
 ;;
 %macro native 3
   section .data
-  wh_ %+ %2 :                    ; Forth word definition label (native word)
+  wh_ %+ %2:                    ; Forth word definition label (native word)
   dq _lw                        ; pointer to previous word
   %define _lw wh %+ %2          ; update previous word pointer to this word label
                                 ; for .data section
@@ -28,10 +28,10 @@
   db %1, 0                      ; word name
   db %3                         ; flags
 
-  xt_ %+ %2 :                    ; execution token for word, equal to address of
+  xt_ %+ %2:                    ; execution token for word, equal to address of
   dq i_ %+ %2                   ; its implementation
   section .text
-  i_ %+ %2 :                     ; word implementation label
+  i_ %+ %2:                     ; word implementation label
   %define _lw wh_%+ %2          ; previous word pointer in .text section set to
                                 ; this word
 %endmacro
@@ -61,14 +61,14 @@
 ;;
 %macro colon 3
   section .data
-  wh_ %+ %2 :                    ; Forth colon word definition label
+  wh_ %+ %2:                    ; Forth colon word definition label
   dq _lw                        ; pointer to previous word
   %define _lw wh_ %+ %2         ; update previous word pointer to this word label
   db 0                          ; make the name start
   db %1, 0                      ; word name
   db %3                         ; flags
 
-  xt_ %+ %2 :                    ; execution token for colon word, equal to
+  xt_ %+ %2:                    ; execution token for colon word, equal to
   dq i_docol                    ; address of docol implementation
 %endmacro
 
