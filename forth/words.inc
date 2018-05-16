@@ -12,7 +12,7 @@
 ;; @details    ( a -- )
 ;;
 native "drop", drop
-  add rsp, 8
+  add rsp, 8                    ; cell size is 8 bytes
   jmp next
 
 ;;
@@ -21,10 +21,10 @@ native "drop", drop
 ;; @details    ( a b -- b a )
 ;;
 native "swap", swap
-  pop rax
-  pop rdx
-  push rax
-  push rdx
+  pop rax                       ; b
+  pop rdx                       ; a
+  push rax                      ; b
+  push rdx                      ; a on TOS
   jmp next
 
 ;;
@@ -44,24 +44,24 @@ native "dup", dup
 ;;             ( a b c -- b c a )
 ;;
 native "rot", rot
-  pop rcx
-  pop rdx
-  pop rax
-  push rdx
-  push rcx
-  push rax
+  pop rcx                       ; c
+  pop rdx                       ; b
+  pop rax                       ; a
+  push rdx                      ; b
+  push rcx                      ; c
+  push rax                      ; a on TOS
   jmp next
 
 ;;
 ;; @brief      Add topmost two elements on the stack.
 ;;
-;; @details    ( y x -- [ x + y] )
+;; @details    ( y x -- [ x + y ] )
 ;;
 ;; @return     Value on the stack is the sum of the topmost two elements.
 ;;
 native "+", plus
-  pop rax
-  add [rsp], rax
+  pop rax                       ; x
+  add [rsp], rax                ; y + x on TOS
   jmp next
 
 ;;
@@ -74,52 +74,51 @@ native "+", plus
 ;; @return     Value on the stack is the product of the topmost two elements.
 ;;
 native "*", mul
-  pop rax
-  pop rdx
-  imul rdx
-  push rax
+  pop rax                       ; x
+  pop rdx                       ; y
+  imul rdx                      ; x * y in rax
+  push rax                      ; product at TOS
   jmp next
 
 ;;
-;; @brief      Divide topmost element by the next element.
+;; @brief      Arithmetic integer division.
 ;;
-;; @details    ( y x -- [ x / y] )
+;; @details    ( x y -- [ x / y ] )
 ;;
 ;; @param      Operands are integers.
 ;;
 ;; @return     Result of division is returned on the stack.
 ;;
 native "/", div
-  pop rcx
-  pop rax
+  pop rcx                       ; second operand is popped first (divisor): y
+  pop rax                       ; dividend: x
   cqo
-  idiv rcx
-  push rax
+  idiv rcx                      ; rdx:rax / rax <=> x / y => rax
+  push rax                      ; quotient in rax at TOS
   jmp next
 
 ;;
-;; @brief      Modulo operator returns the remainder after division of topmost
-;;             stack element by next element.
+;; @brief      Modulo operator returns the remainder of division.
 ;;
-;; @details    ( y x -- [ x mod y] )
+;; @details    ( x y -- [ x mod y] )
 ;;
 ;; @param      Operands are integers.
 ;;
 ;; @return     Remainder after division.
 ;;
 native "%", mod
-  pop rcx
-  pop rax
+  pop rcx                       ; second operand is popped first (divisor): y
+  pop rax                       ; dividend: x
   cqo
-  idiv rcx
-  push rdx
+  idiv rcx                      ; rdx:rax / rax <=> x / y => rdx
+  push rdx                      ; remainder in rdx at TOS
   jmp next
 
 ;;
 ;; @brief      Subtraction operator returns the arithmetic difference between
 ;;             the topmost stack element and the next element.
 ;;
-;; @details    ( y x -- [ x - y ] )
+;; @details    ( x y -- [ x - y ] )
 ;;
 ;; @param      Operands are integers.
 ;;
@@ -127,8 +126,8 @@ native "%", mod
 ;;             element.
 ;;
 native "-", minus
-  pop rax
-  sub [rsp], rax
+  pop rax                       ; second operand is popped first: y
+  sub [rsp], rax                ; [rsp] - rax <=> x - y
   jmp next
 
 ;;

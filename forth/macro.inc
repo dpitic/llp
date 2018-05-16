@@ -4,7 +4,7 @@
 %ifndef _MACRO_INC_
 %define _MACRO_INC_
 
-%define _lw 0                   ; pointer to previous word
+%define _lw 0                   ; pointer to previous word initialised to null 
 
 ;;
 ;; @brief      Define a native word.
@@ -15,15 +15,14 @@
 ;;             instance.
 ;;
 ;; @param      %1  Forth native word name as string constant.
-;; @param      %2  Part of the word identifier.
+;; @param      %2  Suffix part of the word identifier in wh_, xt_ and i_ labels.
 ;; @param      %3  Flags.
 ;;
 %macro native 3
   section .data
   wh_ %+ %2:                    ; Forth word definition label (native word)
   dq _lw                        ; pointer to previous word
-  %define _lw wh %+ %2          ; update previous word pointer to this word label
-                                ; for .data section
+  %define _lw wh_ %+ %2         ; update previous word pointer to this word label
   db 0                          ; mark the name start
   db %1, 0                      ; word name
   db %3                         ; flags
@@ -32,7 +31,7 @@
   dq i_ %+ %2                   ; its implementation
   section .text
   i_ %+ %2:                     ; word implementation label
-  %define _lw wh_%+ %2          ; previous word pointer in .text section set to
+;  %define _lw wh_%+ %2          ; previous word pointer in .text section set to
                                 ; this word
 %endmacro
 
