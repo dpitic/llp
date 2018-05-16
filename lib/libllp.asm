@@ -244,6 +244,69 @@ read_word:
   ret                           ; rax == 0, string too long for buffer
 
 ;;
+;; @brief      Read next word from stdin.
+;;
+;; @details    Accepts a buffer address and size as arguments, and reads the
+;;             next word from stdin (skipping whitespaces) into buffer.
+;;
+;; @param      rdi   Address of buffer used to store word read from stdin.
+;;             rsi   Size of read buffer.
+;;
+;; @return     rax   0 if word is too big for buffer specified; otherwise
+;;                   pointer to buffer address.
+;;             rdx   Length of word (bytes).
+;;
+global read_word_fb:function
+read_word_fb:
+  push r14                      ; buffer index (offset)
+  xor r14, r14                  ; initialise index in buffer
+
+.A:                             ; read first character, skipping white spaces
+  push rdi
+  call read_char                ; rax = character read from stdin
+  pop rdi
+  cmp al, ' '
+  je .A                         ; skip space
+  cmp al, 10
+  je .A                         ; skip LF ('\n')
+  cmp al, 13
+  je .A                         ; skip CR ('\r')
+  cmp al, 9
+  je .A                         ; skip TAB ('\t')
+  test al, al
+  jz .C                         ; null terminator found
+
+.B:                             ; read subsequent characters, not white space
+  mov byte [rdi + r14], al
+  inc r14                       ; increment index in buffer
+
+  push rdi
+  call read_char                ; rax = character read from stdin
+  pop rdi
+  cmp al, ' '                   ; any white space character == end of word
+  je .C                         ; found space at end of word
+  cmp al, 10
+  je .C                         ; found LF ('\n') at end of word
+  cmp al, 13
+  je .C                         ; found CR ('\r') at end of word
+  cmp al, 9
+  je .C                         ; found TAB ('\t') at end of word
+  test al, al
+  jz .C                         ; null terminator found
+  cmp r14, 254                  ; check if buffer is full
+  je .C
+
+  jmp .B                        ; read next character
+
+.C:                             ; end of word string, null or white space found
+  mov byte [rdi + r14], 0       ; null terminate buffer
+  mov rax, rdi                  ; pointer to buffer
+
+  mov rdx, r14                  ; rdx = length of word (bytes)
+  pop r14
+  ret                           ; rax = pointer to buffer read
+
+;;
 ;; @brief      Accepts a null-terminated string and tries to parse an unsigned
 ;;             number from its start.
 ;;
@@ -290,7 +353,7 @@ parse_int:
   jmp parse_uint
 .signed:
   inc rdi                       ; next byte
-  call parse_int
+  call parse_uint
   neg rax
   test rdx, rdx
   jz .error
