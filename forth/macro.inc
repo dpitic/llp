@@ -19,20 +19,18 @@
 ;; @param      %3  Flags.
 ;;
 %macro native 3
-  section .data
-  wh_ %+ %2:                    ; Forth word definition label (native word)
+section .data
+wh_ %+ %2:                      ; Forth word definition label (native word)
   dq _lw                        ; pointer to previous word
   %define _lw wh_ %+ %2         ; update previous word pointer to this word label
   db 0                          ; mark the name start
   db %1, 0                      ; word name
   db %3                         ; flags
 
-  xt_ %+ %2:                    ; execution token for word, equal to address of
+xt_ %+ %2:                      ; execution token for word, equal to address of
   dq i_ %+ %2                   ; its implementation
-  section .text
-  i_ %+ %2:                     ; word implementation label
-;  %define _lw wh_%+ %2          ; previous word pointer in .text section set to
-                                ; this word
+section .text
+i_ %+ %2:                       ; word implementation label
 %endmacro
 
 ;;
@@ -59,15 +57,15 @@
 ;; @param      %3  Flags.
 ;;
 %macro colon 3
-  section .data
-  wh_ %+ %2:                    ; Forth colon word definition label
+section .data
+wh_ %+ %2:                      ; Forth colon word definition label
   dq _lw                        ; pointer to previous word
   %define _lw wh_ %+ %2         ; update previous word pointer to this word label
   db 0                          ; make the name start
   db %1, 0                      ; word name
   db %3                         ; flags
 
-  xt_ %+ %2:                    ; execution token for colon word, equal to
+xt_ %+ %2:                      ; execution token for colon word, equal to
   dq i_docol                    ; address of docol implementation
 %endmacro
 
@@ -90,11 +88,11 @@
 ;; @details    This macro allocates an 8 byte cell on the return stack and
 ;;             pushes the operand onto the return stack.
 ;;
-;; @param      %1  Value to push onto the return stack.
+;; @param      %1  Operand to push onto the return stack.
 ;;
 %macro rpush 1
   sub rstack, 8                 ; 8 byte cell size
-  mov qword [rstack], %1
+  mov qword [rstack], %1        ; write operand onto the return stack
 %endmacro
 
 ;;
@@ -104,12 +102,12 @@
 ;;             the operand. It removes the 8 byte cell memory from the return
 ;;             stack.
 ;;
-;; @param      %1  Register into which the value from the rstack should be
+;; @param      %1  Operand into which the value from the rstack should be
 ;;                 copied into.
 ;;
 %macro rpop 1
-  mov %1, qword [rstack]
-  add rstack, 8
+  mov %1, qword [rstack]        ; copy top return stack contents into operand
+  add rstack, 8                 ; 8 byte cell size
 %endmacro
 
 %macro const 2

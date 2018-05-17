@@ -17,11 +17,9 @@ global _start
                                 ; and after a call.
 
 section .text                   ; machine instructions
-
-%include "words.inc"
+%include "words.inc"            ; Forthress word dictionary
 
 section .bss                    ; read/write global variables
-
   resq	1023
 rstack_start: resq 1
 
@@ -38,10 +36,9 @@ section .rodata                 ; read only data
 msg_no_such_word: db ": no such word", 10, 0
 
 section .text                   ; machine instructions
-next:
-  mov w, pc
-  add pc, 8
-  mov w, [w]
-  jmp [w]
+next:                           ; Forth engine inner interpreter.
+  mov w, [pc]                   ; read memory contents starting at address of pc
+  add pc, 8                     ; set command pointer to next instruction
+  jmp [w]                       ; jump to implementation code
 
-_start: jmp i_init
+_start: jmp i_init              ; program starts execution from the init word

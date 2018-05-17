@@ -246,14 +246,13 @@ read_word:
 ;;
 ;; @brief      Read next word from stdin.
 ;;
-;; @details    Accepts a buffer address and size as arguments, and reads the
-;;             next word from stdin (skipping whitespaces) into buffer.
+;; @details    Read word from stdin (skipping whitespaces) into buffer of fixed
+;;             size 254 bytes. This is an alternative and simplified
+;;             implementation of read_word function.
 ;;
 ;; @param      rdi   Address of buffer used to store word read from stdin.
-;;             rsi   Size of read buffer.
 ;;
-;; @return     rax   0 if word is too big for buffer specified; otherwise
-;;                   pointer to buffer address.
+;; @return     rax   Pointer to buffer address.
 ;;             rdx   Length of word (bytes).
 ;;
 global read_word_fb:function
@@ -395,7 +394,7 @@ string_copy:
 
   push rsi                      ; destination buffer address
 
-    .loop:                      ; string copy loop
+.loop:                          ; string copy loop
     mov dl, byte [rdi]          ; copy byte from source string
     mov byte [rsi], dl          ; into destination buffer
     inc rdi                     ; increment source string index
@@ -406,7 +405,7 @@ string_copy:
   pop rax                       ; rax = destination buffer address
   ret
 
-  .too_long:
+.too_long:
   xor rax, rax                  ; string too big for buffer, rax = 0
   ret
 

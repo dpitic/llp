@@ -214,7 +214,8 @@ native ".S", show_stack
   add rcx, 8
   jmp .loop
 
-  section .rodata
+section .rodata                 ; read only data
+; This is the Forthress program execution token
 interpreter_stub: dq xt_interpreter
 
 ;;
@@ -226,38 +227,42 @@ interpreter_stub: dq xt_interpreter
 ;;
 ;; @return     return
 ;;
-section .data
+section .data                   ; initialised global variables
 stack_base: dq 0
 native "init", init
   mov qword [state], 0
-  mov rstack, rstack_start
-  mov pc, interpreter_stub
+  mov rstack, rstack_start      ; initialise return stack
+  mov pc, interpreter_stub      ; initialise command pointer to interpreter
   cmp qword [stack_base], 0
   je .first
   mov rsp, [stack_base]
   jmp next
 .first:
   mov [stack_base], rsp
-  jmp next
+  jmp next                      ; fetch next instruction
 
 ;;
 ;; @brief      Implementation of any colon word.
 ;;
 ;; @details    This is the implementation of any colon word. The execution token
-;;             is not used, but the implementation (i_docol) is.
+;;             is not used, but the implementation (i_docol) is. Together with
+;;             the exit word, docol is used to implement call/ret behaviour.
 ;;
 native "docol", docol
-  rpush pc
-  add w, 8
-  mov pc, w
-  jmp next
+  rpush pc                      ; save command pointer on return stack
+  add w, 8                      ; cell size 8 bytes
+  mov pc, w                     ; pc = first execution token inside current word
+  jmp next                      ; fetch next instruction
 
 ;;
 ;; @brief      Exit from colon word.
 ;;
+;; @details    This word is designed to end all colon words. Together with
+;;             docol, it is used to implement call/ret behaviour.
+;;
 native "exit", exit
-  rpop pc
-  jmp next
+  rpop pc                       ; restore command pointer from return stack
+  jmp next                      ; fetch next instruction
 
 ;;
 ;; @brief      Pop element from data stack and push onto return stack.
@@ -474,13 +479,17 @@ native "0branch", branch0
 ;; @brief      Push a value immediately following this execution token.
 ;;
 ;; @details    lit <value>
+;;             Read the next integer that the command pointer points to and
+;;             advance pc by one cell so that pc will never point at the
+;;             embedded operand. This is a special immediate word used to
+;;             quit compiler mode.
 ;;
 ;; @param      Value to push.
 ;;
 native "lit", lit
-  push qword [pc]
-  add pc, 8
-  jmp next
+  push qword [pc]               ; push command pointer contents on stack
+  add pc, 8                     ; advance command pointer by one cell
+  jmp next                      ; fetch next instruction
 
 ; Address of the input buffer (used by interpreter/compiler)
 const inbuf, input_buf
@@ -491,11 +500,13 @@ const mem, user_mem
 ; Last word address
 const last_word, last_word
 
-; State call address
+; State call address.
 ; The state cell stores either 1 (compilation mode) or 0 (interpreter mode)
 const state, state
 
-; here points to the last cell of the word currently being defined.
+; here points to the last cell of the word currently being defined. It stores
+; the address of the current position to write words in compile mode. Each
+; write advances here by one cell.
 const here, [here]
 
 ;;
@@ -598,15 +609,15 @@ native "create", create
   inc rsi
 
   ; name
-  pop rdi
-  push rsi
-  call str_cpy
-  pop rsi
-  push rsi
-  mov rdi, rsi
-  call string_length
-  pop rsi
-  add rsi, rax
+  pop rdi                       ; pop source string from stack
+  push rsi                      ; rsi will be modified by str_cpy
+  call str_cpy                  ; rsi = ptr. to destination string buffer
+  pop rsi                       ; restore rsi
+  push rsi                      ; rsi is caller-saved register
+  mov rdi, rsi                  ; rdi = pointer to null terminated string
+  call string_length            ; rax = length of string (word)
+  pop rsi                       ; restore rsi
+  add rsi, rax                  ; add length of word (string)
 
   ; flags
   inc rsi
@@ -619,6 +630,11 @@ native "create", create
 
 ;;
 ;; @brief      Read word from stdin and start defining it.
+;;
+;; @details    Causes Forth to switch into compiler mode. It reads the next
+;;             word and uses it to create a new entry in the dictionary with
+;;             docol as its implementation. It then reads words, finds them in
+;;             the dictionary, and adds them to the current word being defined.
 ;;
 colon ":", colon
 .restart:
