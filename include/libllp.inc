@@ -16,9 +16,11 @@ extern print_int
 extern string_equals
 extern read_char
 extern read_word
+extern read_word_fb
 extern parse_uint
 extern parse_int
 extern string_copy
+extern str_cpy
 extern exit
 
 %endif                          ; _LIBLLP_INC_

@@ -146,7 +146,7 @@ string_equals:
   jnz string_equals             ; not reached end of strings
   mov rax, 1                    ; strings are equal
   ret                           ; rax = 1
-  .no:
+.no:
   xor rax, rax                  ; strings are not equal
   ret                           ; rax = 0
 
@@ -331,7 +331,7 @@ parse_uint:
   add rax, r9
   inc rcx                       ; increment string offset
   jmp .loop
-  .end:
+.end:
   mov rdx, rcx                  ; rdx = length of string
   ret                           ; rax = number
 
@@ -361,7 +361,7 @@ parse_int:
   inc rdx                       ; increment length counter
   ret 
 
-  .error:
+.error:
   xor rax, rax                  ; error: rax = 0
   ret
 
@@ -408,6 +408,24 @@ string_copy:
 
   .too_long:
   xor rax, rax                  ; string too big for buffer, rax = 0
+  ret
+
+;;
+;; @brief      Copy string to destination buffer.
+;;
+;; @details    Copy source string to destination buffer.
+;;
+;; @param      rdi   Pointer to source string.
+;; @param      rsi   Pointer to destination buffer.
+;;
+global str_cpy:function
+str_cpy:
+  mov dl, byte [rdi]            ; copy byte from source string
+  mov byte [rsi], dl            ; into destination buffer
+  inc rdi                       ; increment source string index
+  inc rsi                       ; increment destination buffer index
+  test dl, dl                   ; check if null terminator found
+  jnz str_cpy
   ret
 
 ;;

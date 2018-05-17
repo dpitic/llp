@@ -368,9 +368,10 @@ native "emit", emit
 ;; @return     Length of the word read from stdin is pushed onto the stack.
 ;;
 native "word", word
-  pop rdi
+  pop rdi                       ; address of string storage buffer
+  mov rsi, 254                  ; size of read buffer
   call read_word
-  push rdx
+  push rdx                      ; length of word read
   jmp next
 
 ;;
@@ -599,7 +600,7 @@ native "create", create
   ; name
   pop rdi
   push rsi
-  call string_copy
+  call str_cpy
   pop rsi
   push rsi
   mov rdi, rsi
