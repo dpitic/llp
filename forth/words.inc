@@ -301,32 +301,34 @@ colon "constant", constant
 ;;
 ;; @param      Pointer to a string representing a Forth word.
 ;;
-;; @return     Address of the word header in the dictionary.
+;; @return     Address of the word header in the dictionary on the stack.
 ;;
 native "find", find
-  mov rsi, [last_word]
+  mov rsi, [last_word]          ; rsi = dictionary word pointer
 .loop:
-  mov rdi, [rsp]
+  mov rdi, [rsp]                ; rdi = pointer to word on stack
   push rsi
   add rsi, 9
-  call string_equals
+  call string_equals            ; rax = 1 if equal, 0 otherwise
   pop rsi
   test rax, rax
   jnz .found
 
   mov rsi, [rsi]
-  test rsi, rsi
+  test rsi, rsi                 ; check if end of dictionary
   jnz .loop
 .not_found:
   mov qword [rsp], 0
   push 0
   jmp next
 .found:
-  mov [rsp], rsi
-  jmp next
+  mov [rsp], rsi                ; write address of word header on the stack
+  jmp next                      ; fetch next instruction
 
 ;;
-;; @brief      Convert word header start address to the execution token.
+;; @brief      Code from address.
+;;
+;; @details    Convert word header start address to the execution token.
 ;;
 ;; @param      Address of word at top of stack.
 ;;
