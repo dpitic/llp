@@ -20,8 +20,8 @@ section .text                   ; machine instructions
 %include "words.inc"            ; Forthress word dictionary
 
 section .bss                    ; read/write global variables
-  resq	1023
-rstack_start: resq 1
+  resq	1023                    ; return stack 1024 * 8 byte cells
+rstack_start: resq 1            ; starting at this address
 
 input_buf: resb 1024
 user_dict: resq 65536

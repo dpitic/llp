@@ -335,19 +335,19 @@ native "find", find
 ;; @return     Execution token for the word.
 ;;
 native "cfa", cfa
-  pop rsi
-  add rsi, 9
-.loop:
+  pop rsi                       ; word header address
+  add rsi, 9                    ; skip to execution token
+.loop:                          ; find word null terminator
   mov al, [rsi]
   test al, al
-  jz .end
+  jz .end                       ; found word terminator
   inc rsi
   jmp .loop
 
 .end:
-  add rsi, 2
-  push rsi
-  jmp next
+  add rsi, 2                    ; skip null terminator and flag
+  push rsi                      ; address of word execution token
+  jmp next                      ; fetch next instruction
 
 ;;
 ;; @brief      Output a single character from the stack to stdout.
@@ -359,9 +359,9 @@ native "cfa", cfa
 ;; @param      Character element at the top of the stack.
 ;;
 native "emit", emit
-  pop rdi
+  pop rdi                       ; address of string to print
   call print_char
-  jmp next
+  jmp next                      ; fetch next instruction
 
 ;;
 ;; @brief      Read a word from stdin and store it starting at the given address.
@@ -379,7 +379,7 @@ native "word", word
   mov rsi, 254                  ; size of read buffer
   call read_word
   push rdx                      ; length of word read
-  jmp next
+  jmp next                      ; fetch next instruction
 
 ;;
 ;; @brief      Parse string as integer.
@@ -640,7 +640,7 @@ native "create", create
 ;;
 colon ":", colon
 .restart:
-  dq xt_inbuf, xt_word
+  dq xt_inbuf, xt_word          ; read word from stack
   branch0 .restart
   dq xt_lit, 0, xt_inbuf, xt_create
   dq xt_state, xt_lit, 1, xt_write
@@ -660,10 +660,10 @@ colon ";", semicolon, 1
 ;;
 colon "interpreter", interpreter
 .start:
-  dq xt_inbuf, xt_word
+  dq xt_inbuf, xt_word          ; read word from stack
   branch0 .end_of_input
 
-  dq xt_inbuf, xt_find          ; find in dictionary
+  dq xt_inbuf, xt_find          ; find word in dictionary
 
   dq xt_dup
   branch0 .number               ; if not found, try to parse as a number
@@ -675,7 +675,7 @@ colon "interpreter", interpreter
 
   ; if is immediate
   dq xt_dup
-  dq  xt_lit, 1, xt_minus, xt_fetch_char, xt_not
+  dq xt_lit, 1, xt_minus, xt_fetch_char, xt_not
   branch0 .interpreting
 
   ; compile

@@ -14,3 +14,7 @@ $(ITC):	itc.asm $(LIBLLP)
 .PHONY:	clean
 clean:
 	rm -f $(PROGS) $(ITC) $(TEMPFILES) *.o *.so
+
+# This include file enables building the target and I/O library dependency from
+# inside the source directory.
+include $(ROOT)/Make.libllp.inc

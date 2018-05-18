@@ -17,25 +17,25 @@ global _start
                                 ; before and after a call.
 
 section .bss                    ; read/write global variables
-  resq 1023
-rstack_start: resq 1
-input_buf: resb 1024
+  resq 1023                     ; return stack 1024 * 8 byte cells
+rstack_start: resq 1            ; starting at this address
+input_buf: resb 1024            ; stack input buffer
 
 section .text                   ; machine instructions
 
-main_stub: dq xt_main           ; this one cell is the program
+main_stub: dq xt_main           ; this one cell is the program entry point
 
-; The dictionary starts here. Each word stores the address of its assembly
-; implementation.
+; The dictionary starts here. Each word has an execution token that stores the 
+; address of its assembly implementation.
 
 ; Drop the topmost element from the stack
 w_drop:                         ; 'drop' native word header definition
   dq 0                          ; there is no previous node
   db "drop", 0                  ; Forth word name
   db 0                          ; flags
-xt_drop: dq i_drop              ; execution token (address of implementation)
+xt_drop: dq i_drop              ; execution token = address of implementation
 i_drop:                         ; word implementation
-  add rsp, 8
+  add rsp, 8                    ; cell size is 8 bytes
   jmp next                      ; fetch next instruction
 
 ; Initialise registers
@@ -43,10 +43,10 @@ w_init:                         ; 'init' native word
   dq w_drop                     ; pointer to previous word
   db "init", 0                  ; Forth word name
   db 0                          ; flags (none)
-xt_init: dq i_init              ; execution token (address of implementation)
+xt_init: dq i_init              ; execution token = address of implementation
 i_init:                         ; word implementation
-  mov rstack, rstack_start
-  mov pc, main_stub
+  mov rstack, rstack_start      ; initialise return stack pointer
+  mov pc, main_stub             ; initialise command pointer to entry point
   jmp next                      ; fetch next instruction
 
 ; Save pc when the colon word starts. Implementation of all colon words.
@@ -54,9 +54,9 @@ w_docol:                        ; 'docol' native word
   dq w_init                     ; pointer to previous word
   db "docol", 0                 ; Forth word name
   db 0                          ; flags (none)
-xt_docol: dq i_docol            ; execution token
+xt_docol: dq i_docol            ; execution token = address of implementation
 i_docol:                        ; word implementation
-  sub rstack, 8                 ; allocate space for return stack
+  sub rstack, 8                 ; allocate space on return stack
   mov [rstack], pc              ; save pc in return stack
   add w, 8                      ; cell size is 8 bytes
   mov pc, w                     ; pc = first execution token inside current word
@@ -67,10 +67,10 @@ w_exit:                         ; 'exit' native word
   dq w_docol                    ; pointer to previous word
   db "exit", 0                  ; Forth word name
   db 0                          ; flags (none)
-xt_exit: dq i_exit              ; execution token
+xt_exit: dq i_exit              ; execution token = address of implementation
 i_exit:                         ; word implementation
   mov pc, [rstack]              ; restore pc from stack
-  add rstack, 8
+  add rstack, 8                 ; drop return stack
   jmp next                      ; fetch next instruction
 
 ; Take a buffer pointer from stack. Read a word from input and store it starting
@@ -79,11 +79,12 @@ w_word:                         ; 'word' native word
   dq w_exit                     ; pointer to previous word
   db "word", 0                  ; Forth word name
   db 0                          ; flags (none)
-xt_word: dq i_word              ; execution token
+xt_word: dq i_word              ; execution token = address of implementation
 i_word:                         ; word implementation
-  pop rdi
+  pop rdi                       ; address of string storage buffer
+  mov rsi, 254                  ; size of read buffer
   call read_word
-  push rdx
+  push rdx                      ; length of word read
   jmp next                      ; fetch next instruction
 
 ; Take a pointer to a string from the stack and print it.
@@ -91,9 +92,9 @@ w_prints:                       ; 'prints' native word
   dq w_word                     ; pointer to previous word
   db "prints", 0                ; Forth word name
   db 0                          ; flags (none)
-xt_prints: dq i_prints          ; execution token
+xt_prints: dq i_prints          ; execution token = address of implementation
 i_prints:                       ; word implementation
-  pop rdi
+  pop rdi                       ; address of string to print
   call print_string
   jmp next                      ; fetch next instruction
 
@@ -102,7 +103,7 @@ w_bye:                          ; 'bye' native word
   dq w_prints                   ; pointer to previous word
   db "bye", 0                   ; Forth word name
   db 0                          ; flags (none)
-xt_bye: dq i_bye                ; execution token
+xt_bye: dq i_bye                ; execution token = address of implementation
 i_bye:                          ; word implementation
   mov rax, 60                   ; exit() syscall identifier
   xor rdi, rdi                  ; 0 exit status
@@ -113,9 +114,9 @@ w_inbuf:                        ; 'inbuf' word
   dq w_bye                      ; pointer to previous word
   db "inbuf", 0                 ; Forth word name
   db 0                          ; flags (none)
-xt_inbuf: dq i_inbuf            ; execution token
+xt_inbuf: dq i_inbuf            ; execution token = address of implementation
 i_inbuf:                        ; word implementation
-  push qword input_buf
+  push qword input_buf          ; push address of input buffer on stack
   jmp next                      ; fetch next instruction
 
 ; This is a colon word, it stores execution tokens. Each token corresponds to a
@@ -125,12 +126,12 @@ w_main:                         ; colon word 'main'
   db "main", 0                  ; Forth word name
   db 0                          ; flags (none)
 xt_main: dq i_docol             ; execution token
-  dq xt_inbuf
-  dq xt_word
-  dq xt_drop
-  dq xt_inbuf
-  dq xt_prints
-  dq xt_bye
+  dq xt_inbuf                   ; push address of input buffer on stack
+  dq xt_word                    ; read word from stack
+  dq xt_drop                    ; drop input word from stack
+  dq xt_inbuf                   ; push address of stack buffer on stack
+  dq xt_prints                  ; print word on stack
+  dq xt_bye                     ; exit program
 
 ; The inner interpreter. This fetches the next instruction and starts its
 ; execution.
