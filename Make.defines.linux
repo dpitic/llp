@@ -12,5 +12,8 @@ RANLIB = ranlib
 AR = ar
 LIBLLP = $(ROOT)/lib/libllp.a
 
+CC = gcc
+CFLAGS = -ansi -Wall
+
 # Common temp files to delete from each directory.
 TEMPFILES = core.* *.o temp.* *.out

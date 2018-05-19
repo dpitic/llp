@@ -1,4 +1,4 @@
-DIRS = lib ch02 a_gdb ch04 ch05 dict ch07 forth
+DIRS = lib ch02 a_gdb ch04 ch05 dict ch07 forth ch08
 
 all:
 	for i in $(DIRS); do \
