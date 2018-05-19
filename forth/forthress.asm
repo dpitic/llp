@@ -4,8 +4,8 @@
 ;;------------------------------------------------------------------------------
 
 global _start
-%include "libllp.inc"
-%include "macro.inc"
+%include "libllp.inc"           ; I/O library function declarations
+%include "macro.inc"            ; macro definitions
 
 ; Forth registers are implemented in callee-saved registers, so they are
 ; guaranteed to survive function calls unchanged.
@@ -23,14 +23,14 @@ section .bss                    ; read/write global variables
   resq	1023                    ; return stack 1024 * 8 byte cells
 rstack_start: resq 1            ; starting at this address
 
-input_buf: resb 1024
-user_dict: resq 65536
-user_mem: resq 65536
+input_buf: resb 1024            ; stack input buffer memory allocation
+user_dict: resq 65536           ; user defined word dictionary memory allocation
+user_mem: resq 65536            ; user memory allocation
 
 section .data                   ; initialised global variables
-state: dq 0
-last_word: dq _lw
-here: dq user_dict
+state: dq 0                     ; start in interpreter mode (compiler mode = 1)
+last_word: dq _lw               ; pointer to last word in dictionary
+here: dq user_dict              ; pointer to first free cell in user dict. mem.
 
 section .rodata                 ; read only data
 msg_no_such_word: db ": no such word", 10, 0

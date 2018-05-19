@@ -25,7 +25,7 @@ wh_ %+ %2:                      ; Forth word definition label (native word)
   %define _lw wh_ %+ %2         ; update previous word pointer to this word label
   db 0                          ; mark the name start
   db %1, 0                      ; word name
-  db %3                         ; flags
+  db %3                         ; flags: 0 = native, 1 = immediate
 
 xt_ %+ %2:                      ; execution token for word, equal to address of
   dq i_ %+ %2                   ; its implementation
@@ -54,7 +54,7 @@ i_ %+ %2:                       ; word implementation label
 ;;
 ;; @param      %1  Forth colon word name as string constant.
 ;; @param      %2  Part of the word identifier.
-;; @param      %3  Flags.
+;; @param      %3  Flags: 0 = native word, 1 = immediate word.
 ;;
 %macro colon 3
 section .data
@@ -63,7 +63,7 @@ wh_ %+ %2:                      ; Forth colon word definition label
   %define _lw wh_ %+ %2         ; update previous word pointer to this word label
   db 0                          ; make the name start
   db %1, 0                      ; word name
-  db %3                         ; flags
+  db %3                         ; flags: 0 = native, 1 = immediate
 
 xt_ %+ %2:                      ; execution token for colon word, equal to
   dq i_docol                    ; address of docol implementation

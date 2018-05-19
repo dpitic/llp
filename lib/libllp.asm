@@ -339,26 +339,26 @@ parse_uint:
 ;;             number from its start. No spaces between sign and digits are
 ;;             allowed.
 ;;
-;; @param      rdi   Pointer to string.
+;; @param      rdi   Pointer to null-terminated string.
 ;;
 ;; @return     rax   Number parsed on success, otherwise 0.
 ;;             rdx   Length of string, including sign.
 ;;
 global parse_int:function
 parse_int:
-  mov al, byte [rdi]
+  mov al, byte [rdi]            ; read first string byte to see if negative
   cmp al, '-'
   je .signed                    ; found signed number (negative)
-  jmp parse_uint
+  jmp parse_uint                ; not signed number
 .signed:
   inc rdi                       ; next byte
-  call parse_uint
+  call parse_uint               ; just parse as unsigned number
   neg rax
   test rdx, rdx
   jz .error
 
   inc rdx                       ; increment length counter
-  ret 
+  ret                           ; rax = number
 
 .error:
   xor rax, rax                  ; error: rax = 0
