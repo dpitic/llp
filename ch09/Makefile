@@ -2,7 +2,7 @@ ROOT = ..
 PLATFORM = $(shell $(ROOT)/systype.sh)
 include $(ROOT)/Make.defines.$(PLATFORM)
 
-PROGS = float_reinterpret divisor is_fib
+PROGS = sc_prod prime_chk
 
 all:	$(PROGS)
 
