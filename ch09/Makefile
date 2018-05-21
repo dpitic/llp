@@ -2,7 +2,7 @@ ROOT = ..
 PLATFORM = $(shell $(ROOT)/systype.sh)
 include $(ROOT)/Make.defines.$(PLATFORM)
 
-PROGS = sc_prod prime_chk
+PROGS = sc_prod prime_chk union_example
 
 all:	$(PROGS)
 
