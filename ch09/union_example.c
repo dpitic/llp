@@ -12,7 +12,8 @@ int main(int argc, char const *argv[])
 {
   union dword test;
   test.integer = 0xAABBCCDD;
-  printf("%x\n", test.integer);
-  printf("%x and %x\n", test.shorts[0], test.shorts[1]);
+  printf("%X\n", test.integer);   /* AA BB CC DD */
+  /* test.shorts[0] = FF FF CC DD; test.shorts[1] = FF FF AA BB */
+  printf("%X and %X\n", test.shorts[0], test.shorts[1]);
   return 0;
 }
