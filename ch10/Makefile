@@ -2,7 +2,8 @@ ROOT = ..
 PLATFORM = $(shell $(ROOT)/systype.sh)
 include $(ROOT)/Make.defines.$(PLATFORM)
 
-PROGS = main_square main_ext main_printer_new main_ldd
+PROGS = main_square main_ext main_printer_new main_ldd sum_malloc \
+	static_example
 
 all:	$(PROGS)
 
@@ -26,6 +27,9 @@ square_ext.o:	square_ext.c
 
 main_printer_new:	main_printer_new.c printer.c
 	$(CC) $(CFLAGS) $? -o $@
+
+static_example: static_example.c
+	$(CC) $(CFLAGS) -c $<
 
 clean:
 	rm -f $(PROGS) $(TEMPFILES) *.o
