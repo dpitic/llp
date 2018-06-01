@@ -37,3 +37,27 @@ int stack_pop(struct stack *s) {
   }
   return 0;
 }
+
+void stack_foreach(struct stack *s, void (f)(int)) {
+  struct list *cur;
+  for (cur = s->first; cur; cur = cur->next) {
+    f(cur->value);
+  }
+}
+
+bool stack_is_empty(struct stack const *s) {
+  return s->count == 0;
+}
+
+struct stack stack_init(void) {
+  struct stack empty = { NULL, NULL, 0 };
+  return empty;
+}
+
+void stack_deinit(struct stack *st) {
+  while (!stack_is_empty(st)) {
+    stack_pop(st);
+  }
+  st->first = NULL;
+  st->last = NULL;
+}
