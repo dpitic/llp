@@ -4,7 +4,7 @@
 # assembly programs using nasm.
 
 AS = nasm
-ASFLAGS = -i$(ROOT)/include/ -felf64 -Wall -g
+ASFLAGS = -i$(ROOT)/include/ -felf64 -Wall -g -F dwarf
 
 LDDIR = -L$(ROOT)/lib/
 LDLIBS = $(LDDIR) -lllp
