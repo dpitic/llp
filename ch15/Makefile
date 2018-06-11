@@ -59,11 +59,11 @@ ex3-main.o:	ex3-main.asm
 #-------------------------------------------------------------------------------
 # 4th dynamic library example using C and assembly
 ex4-main:	ex4-main.c ex4-lib.so
-	gcc -Wl,-rpath=.,-I/lib64/ld-linux-x86-64.so.2 -o $@ $?
+	gcc -v -Wl,-rpath=.,-I/lib64/ld-linux-x86-64.so.2 -o $@ $?
 
 ex4-lib.so:	ex4-lib.asm
 	$(AS) $(ASFLAGS) $<
-	gcc -shared -o $@ ex4-lib.o
+	gcc -v -shared -o $@ ex4-lib.o
 #-------------------------------------------------------------------------------
 clean:
 	rm -f $(PROGS) $(TEMPFILES) *.o *.so
