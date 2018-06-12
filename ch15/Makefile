@@ -6,8 +6,10 @@ include $(ROOT)/Make.defines.$(PLATFORM)
 LDFLAGS = -Wl,-rpath=.
 # GCC shared object flags
 SOFLAGS = -fPIC -shared
+# GCC code model { -mcmodel=small|kernel|medium|large }
+CMFLAG = -mcmodel=large
 
-PROGS = mainlib preload_launcher ex1-main ex2-main ex3-main ex4-main
+PROGS = mainlib preload_launcher ex1-main ex2-main ex3-main ex4-main cm-example
 
 all:	$(PROGS) prelib.so
 
@@ -64,6 +66,9 @@ ex4-main:	ex4-main.c ex4-lib.so
 ex4-lib.so:	ex4-lib.asm
 	$(AS) $(ASFLAGS) $<
 	gcc -v -shared -o $@ ex4-lib.o
+#-------------------------------------------------------------------------------
+cm-example:	cm-example.c
+	$(CC) $(CFLAGS) $(CMFLAG) -fpic -o $@ $<
 #-------------------------------------------------------------------------------
 clean:
 	rm -f $(PROGS) $(TEMPFILES) *.o *.so
