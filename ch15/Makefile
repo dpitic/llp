@@ -65,7 +65,7 @@ ex4-main:	ex4-main.c ex4-lib.so
 
 ex4-lib.so:	ex4-lib.asm
 	$(AS) $(ASFLAGS) $<
-	gcc -v -shared -o $@ ex4-lib.o
+	gcc -v -shared -fpic -o $@ ex4-lib.o
 #-------------------------------------------------------------------------------
 cm-example:	cm-example.c
 	$(CC) $(CFLAGS) $(CMFLAG) -fpic -o $@ $<
