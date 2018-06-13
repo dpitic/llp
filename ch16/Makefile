@@ -16,13 +16,13 @@ stack_unwind_main:	stack_unwind_main.o stack_unwind.so
 	$(CC) $(LDFLAGS) -o $@ $?
 
 stack_unwind_main.o:	stack_unwind_main.c
-	$(CC) -c -O0 -o $@ $<
+	$(CC) $(CFLAGS) -c -O0 -o $@ $<
 
 stack_unwind.so:	stack_unwind.asm
 	$(AS) $(ASFLAGS) $<
 	$(CC) $(SOFLAGS) -o $@ stack_unwind.o
 #-------------------------------------------------------------------------------
 clean:
-	rm -f $(PROGS) $(TEMPFILES) *.o *.so
+	rm -f $(PROGS) $(TEMPFILES) *.o *.so *.objdump
 
 .PHONY:	clean
