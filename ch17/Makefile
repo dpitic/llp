@@ -9,7 +9,8 @@ LDFLAGS = -Wl,-rpath=.,-I/lib64/ld-linux-x86-64.so.2
 # GCC shared object flags
 SOFLAGS = -fpic -shared
 
-PROGS = pthread_create_mwe thread_join_mwe dist_fact_sp dist_fact_mp_simple
+PROGS = pthread_create_mwe thread_join_mwe dist_fact_sp dist_fact_mp_simple \
+	dist_fact_mp mutex_ex_counter_bad
 
 all:	$(PROGS)
 
@@ -25,6 +26,12 @@ dist_fact_sp:	dist_fact_sp.c
 #-------------------------------------------------------------------------------
 dist_fact_mp_simple:	dist_fact_mp_simple.c
 	$(CC) $(CFLAGS) -O3 -pthread -std=c99 -o $@ $<
+#-------------------------------------------------------------------------------
+dist_fact_mp:	dist_fact_mp.c
+	$(CC) $(CFLAGS) -O3 -std=c99 -pthread -o $@ $<
+#-------------------------------------------------------------------------------
+mutex_ex_counter_bad:	mutex_ex_counter_bad.c
+	$(CC) $(CFLAGS) -O0 -pthread -std=c99 -o $@ $<
 #-------------------------------------------------------------------------------
 clean:
 	rm -f $(PROGS) $(TEMPFILES) *.o *.so *.objdump
