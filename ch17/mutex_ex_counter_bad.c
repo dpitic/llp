@@ -17,6 +17,17 @@ pthread_t t1, t2;
 /* Prevent the incrementing loop from being optimised. */
 volatile uint64_t value = 0;
 
+/**
+ * @brief    Thread start function used to increment global shared variable.
+ *
+ * @details  This function is executed in separate threads to increment a
+ *           global shared variable a constant amount. This function is not
+ *           thread safe.
+ *
+ * @param    Not used.
+ *
+ * @return   NULL. Global shared variable value is set by this function.
+ */
 void *impl1(void *arg) {
   for (int n = 0; n < 10000000; n++) {
     value += 1;
@@ -24,6 +35,10 @@ void *impl1(void *arg) {
   return NULL;
 }
 
+/*
+ * This program will produce unexpected results due to a data race affecting
+ * the shared global variable.
+ */
 int main(void) {
   pthread_create(&t1, NULL, impl1, NULL);
   pthread_create(&t2, NULL, impl1, NULL);
