@@ -11,7 +11,7 @@ SOFLAGS = -fpic -shared
 
 PROGS = pthread_create_mwe thread_join_mwe dist_fact_sp dist_fact_mp_simple \
 	dist_fact_mp mutex_ex_counter_bad mutex_ex_counter_good condvar_mwe \
-	semaphore_mwe
+	semaphore_mwe reordering_cpu_mwe
 
 all:	$(PROGS)
 
@@ -42,6 +42,9 @@ condvar_mwe:	condvar_mwe.c
 #-------------------------------------------------------------------------------
 semaphore_mwe:	semaphore_mwe.c
 	$(CC) $(CFLAGS) -pthread -std=c99 -o $@ $<
+#-------------------------------------------------------------------------------
+reordering_cpu_mwe:	reordering_cpu_mwe.c
+	$(CC) $(CFLAGS) -pthread -O2 -o $@ $<
 #-------------------------------------------------------------------------------
 clean:
 	rm -f $(PROGS) $(TEMPFILES) *.o *.so *.objdump
