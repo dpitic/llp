@@ -10,7 +10,8 @@ LDFLAGS = -Wl,-rpath=.,-I/lib64/ld-linux-x86-64.so.2
 SOFLAGS = -fpic -shared
 
 PROGS = pthread_create_mwe thread_join_mwe dist_fact_sp dist_fact_mp_simple \
-	dist_fact_mp mutex_ex_counter_bad mutex_ex_counter_good
+	dist_fact_mp mutex_ex_counter_bad mutex_ex_counter_good condvar_mwe \
+	semaphore_mwe
 
 all:	$(PROGS)
 
@@ -35,6 +36,12 @@ mutex_ex_counter_bad:	mutex_ex_counter_bad.c
 #-------------------------------------------------------------------------------
 mutex_ex_counter_good:	mutex_ex_counter_good.c
 	$(CC) $(CFLAGS) -O0 -pthread -std=c99 -o $@ $<
+#-------------------------------------------------------------------------------
+condvar_mwe:	condvar_mwe.c
+	$(CC) $(CFLAGS) -pthread -std=c99 -o $@ $<
+#-------------------------------------------------------------------------------
+semaphore_mwe:	semaphore_mwe.c
+	$(CC) $(CFLAGS) -pthread -std=c99 -o $@ $<
 #-------------------------------------------------------------------------------
 clean:
 	rm -f $(PROGS) $(TEMPFILES) *.o *.so *.objdump
